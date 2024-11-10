@@ -6,48 +6,26 @@ terraform {
     }
   }
 }
-variable "windows_username" {
-  description = "The username for which to grant permissions"
-  type        = string
-  default     = "zacha"  # Replace with a default username or leave it empty
-}
 
 provider "aws" {
-  region     = "eu-west-1"
-  access_key = "AKIAXZEFH5MUCJL6HQUR"
-  secret_key = "Y9SB1nzejCYyOOu8vFsg6az2Rv+4u4LwHFpmgTpq"
+  region = "eu-west-1"
+  access_key = "AKIAXZEFH5MUCJL6HQUR"  # Replace with a variable in production
+  secret_key = "Y9SB1nzejCYyOOu8vFsg6az2Rv+4u4LwHFpmgTpq"  # Replace with a variable in production
 }
 
-// To Generate Private Key
+# Generate SSH Key Pair
 resource "tls_private_key" "rsa_4096" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-variable "key_name" {
-  description = "Name of the SSH key pair"
-}
-
-// Create Key Pair for Connecting EC2 via SSH
 resource "aws_key_pair" "key_pair" {
-  key_name   = var.key_name
+  key_name   = "deploy_key"
   public_key = tls_private_key.rsa_4096.public_key_openssh
 }
 
-// Save PEM file locally
-resource "local_file" "private_key" {
-  content  = tls_private_key.rsa_4096.private_key_pem
-  filename = var.key_name
-
-  provisioner "local-exec" {
-  command = "icacls ${var.key_name} /inheritance:r /grant:r ${var.windows_username}:(F)"
-  }
-}
-
-# Create a security group
 resource "aws_security_group" "sg_ec2" {
-  name        = "sg_ec2"
-  description = "Security group for EC2"
+  name = "sg_ec2"
 
   ingress {
     from_port   = 22
@@ -57,8 +35,8 @@ resource "aws_security_group" "sg_ec2" {
   }
 
   ingress {
-    from_port   = 3000
-    to_port     = 3000
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -72,27 +50,18 @@ resource "aws_security_group" "sg_ec2" {
 }
 
 resource "aws_instance" "public_instance" {
-  ami                    = "ami-06ec8aeac208fbbd3"
+  ami                    = "ami-0404dae8586132164"
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.key_pair.key_name
   vpc_security_group_ids = [aws_security_group.sg_ec2.id]
 
-  tags = {
-    Name = "public_instance"
-  }
-
-  root_block_device {
-    volume_size = 100
-    volume_type = "gp2"
-  }
-
   provisioner "local-exec" {
-    command = "touch dynamic_inventory.ini"
+    command = "echo > ../terraform/dynamic_inventory.ini"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "echo 'EC2 instance is ready.'"
+      "echo 'Instance ready'"
     ]
 
     connection {
@@ -107,7 +76,7 @@ resource "aws_instance" "public_instance" {
 data "template_file" "inventory" {
   template = <<-EOT
     [ec2_instances]
-    ${aws_instance.public_instance.public_ip} ansible_user=ubuntu ansible_private_key_file=${path.module}/${var.key_name}
+    ${aws_instance.public_instance.public_ip} ansible_user=ubuntu ansible_private_key_file=${path.module}/deploy_key.pem
     EOT
 }
 
@@ -116,17 +85,8 @@ resource "local_file" "dynamic_inventory" {
 
   filename = "dynamic_inventory.ini"
   content  = data.template_file.inventory.rendered
-
-  provisioner "local-exec" {
-  command = "icacls ${local_file.dynamic_inventory.filename} /inheritance:r /grant:r ${var.windows_username}:(F)"
-  }
 }
 
-resource "null_resource" "run_ansible" {
-  depends_on = [local_file.dynamic_inventory]
-
-  provisioner "local-exec" {
-    command = "ansible-playbook -i dynamic_inventory.ini deploy-app.yml"
-    working_dir = path.module
-  }
+output "instance_public_ip" {
+  value = aws_instance.public_instance.public_ip
 }
