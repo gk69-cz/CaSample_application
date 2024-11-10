@@ -1,155 +1,168 @@
-Node.js Application Deployment with Docker and Ansible
-This project demonstrates a fully automated deployment of a Node.js application using Docker and Ansible. The application code is containerized in Docker and deployed to a remote server with Ansible playbooks for simplified and repeatable deployments.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Infrastructure Deployment Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+        .collapsible {
+            background-color: #2c3e50;
+            color: white;
+            cursor: pointer;
+            padding: 10px;
+            text-align: left;
+            border: none;
+            outline: none;
+            font-size: 1.1em;
+            border-radius: 5px;
+            margin-top: 5px;
+            width: 100%;
+        }
+        .content {
+            padding: 0 15px;
+            display: none;
+            overflow: hidden;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .link {
+            color: #3498db;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
 
-Project Structure
-plaintext
-Copy code
-├── app/                 # Node.js application source code
-│   ├── index.js         # Application entry file
-│   ├── package.json     # Node.js dependencies and scripts
-│   ├── Dockerfile       # Docker image configuration for the application
-├── ansible/
-│   └── deploy_nodejs_app.yml  # Ansible playbook for Docker-based deployment
-├── README.md            # Documentation for the project
-Prerequisites
-Ensure you have the following installed on your local machine and/or remote server:
+<h1>Cloud Infrastructure Deployment Report</h1>
+<p>This report documents the deployment of a cloud infrastructure with Terraform, Ansible, Docker, and AWS. The deployment includes CI/CD integration for automated updates and testing.</p>
 
-Node.js and npm: Required to develop and test the application.
-Docker: Used to containerize the application.
-Ansible: Automates the deployment tasks.
-Remote Server: SSH-accessible server with Docker capabilities.
-Getting Started
-1. Clone the Repository
-bash
-Copy code
-git clone https://github.com/your-repo-url.git
-cd your-repo
-2. Set Up and Test Application Locally
-Navigate to the app directory and install Node.js dependencies:
+<div class="section">
+    <h2>Contents</h2>
+    <ul>
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#objectives">Objectives</a></li>
+        <li><a href="#architecture">Architecture Overview</a></li>
+        <li><a href="#workflow">Components and Workflow</a></li>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#infrastructure-setup">Infrastructure Setup</a></li>
+        <li><a href="#ci-cd">CI/CD Pipeline</a></li>
+        <li><a href="#conclusion">Conclusion</a></li>
+    </ul>
+</div>
 
-bash
-Copy code
-cd app
-npm install
-To start the application locally, use:
+<div class="section" id="introduction">
+    <button type="button" class="collapsible">Introduction</button>
+    <div class="content">
+        <p>This report details a cloud infrastructure deployment using IaC (Infrastructure as Code), configuration management, containerization, and a CI/CD pipeline for automated provisioning and deployment.</p>
+    </div>
+</div>
 
-bash
-Copy code
-node index.js
-The application should run on port 8080.
+<div class="section" id="objectives">
+    <button type="button" class="collapsible">Objectives</button>
+    <div class="content">
+        <p>The deployment involves:</p>
+        <ul>
+            <li>Terraform for infrastructure provisioning.</li>
+            <li>Ansible for configuration management and application deployment.</li>
+            <li>Docker for packaging the Node.js application.</li>
+            <li>AWS for hosting the EC2 instance.</li>
+        </ul>
+    </div>
+</div>
 
-3. Docker Configuration
-The Dockerfile in the app directory is configured to:
+<div class="section" id="architecture">
+    <button type="button" class="collapsible">Architecture Overview</button>
+    <div class="content">
+        <p>The architecture includes infrastructure as code, configuration management, containerization, and CI/CD for automated deployment.</p>
+        <p><strong>GitHub Repository:</strong> <a href="https://github.com/gk69-cz/CaSample_application.git" class="link">Sample Application</a></p>
+    </div>
+</div>
 
-Set up the Node.js environment.
-Install the required dependencies.
-Copy application files.
-Expose port 8080 for the application.
-Run the application using Node.js.
-Dockerfile
-Dockerfile
-Copy code
-# Base image
-FROM node:20
+<div class="section" id="workflow">
+    <button type="button" class="collapsible">Components and Workflow</button>
+    <div class="content">
+        <ul>
+            <li><strong>Terraform:</strong> Provision AWS resources like EC2 instances and security groups.</li>
+            <li><strong>Ansible:</strong> Automate installation of Docker and deploy the Node.js application.</li>
+            <li><strong>Docker:</strong> Package the application in a portable container for deployment.</li>
+            <li><strong>CI/CD:</strong> GitHub Actions or Jenkins for testing, building, and deploying changes.</li>
+        </ul>
+    </div>
+</div>
 
-# Set the working directory
-WORKDIR /app
+<div class="section" id="prerequisites">
+    <button type="button" class="collapsible">Prerequisites</button>
+    <div class="content">
+        <ul>
+            <li>Node.js Project</li>
+            <li>GitHub for version control and CI/CD integration</li>
+            <li>AWS Account for provisioning resources</li>
+            <li>Docker Desktop for containerization</li>
+        </ul>
+    </div>
+</div>
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+<div class="section" id="infrastructure-setup">
+    <button type="button" class="collapsible">Infrastructure Setup</button>
+    <div class="content">
+        <p><strong>Terraform:</strong> Used to provision the EC2 instance, security groups, and other resources on AWS.</p>
+        <p><strong>Key Steps:</strong></p>
+        <ol>
+            <li>Setup AWS IAM credentials.</li>
+            <li>Define infrastructure in <code>main.tf</code>.</li>
+            <li>Initialize Terraform, plan, and apply configurations.</li>
+        </ol>
+    </div>
+</div>
 
-# Install dependencies
-RUN npm install
+<div class="section" id="ci-cd">
+    <button type="button" class="collapsible">CI/CD Pipeline</button>
+    <div class="content">
+        <p>The CI/CD pipeline automates deployment using GitHub Actions. It handles:</p>
+        <ul>
+            <li>Terraform initialization and application for infrastructure changes</li>
+            <li>Docker image build and push</li>
+            <li>Ansible playbook execution for configuration</li>
+        </ul>
+    </div>
+</div>
 
-# Copy application source
-COPY . .
+<div class="section" id="conclusion">
+    <button type="button" class="collapsible">Conclusion</button>
+    <div class="content">
+        <p>This deployment leverages Terraform, Docker, and Ansible to automate cloud infrastructure management and application deployment. It ensures scalable, repeatable, and efficient processes.</p>
+    </div>
+</div>
 
-# Set environment variable
-ENV PORT=8080
+<script>
+    const coll = document.getElementsByClassName("collapsible");
+    for (let i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            const content = this.nextElementSibling;
+            content.style.display = content.style.display === "block" ? "none" : "block";
+        });
+    }
+</script>
 
-# Expose port
-EXPOSE 8080
-
-# Run the application
-CMD ["node", "index.js"]
-4. Build and Test Docker Container Locally
-To build and test the Docker container locally:
-
-bash
-Copy code
-docker build -t nodejs-app-image .
-docker run -p 8080:8080 nodejs-app-image
-Visit http://localhost:8080 to confirm the application is accessible.
-
-5. Ansible Deployment Setup
-The Ansible playbook deploy_nodejs_app.yml in the ansible/ folder automates the process of setting up and running the Dockerized application on a remote server.
-
-Ansible Playbook (deploy_nodejs_app.yml)
-yaml
-Copy code
----
-- name: Deploy Node.js application using Docker
-  hosts: all
-  become: true
-  vars:
-    app_name: "nodejs-app"
-    docker_image_name: "nodejs-app-image"
-    app_code_path: "/home/ubuntu/app"
-    container_port: 8080
-
-  tasks:
-    - name: Ensure Docker is installed
-      apt:
-        name: docker.io
-        state: present
-        update_cache: yes
-
-    - name: Copy application code
-      copy:
-        src: "../app"
-        dest: "{{ app_code_path }}"
-        mode: 0755
-        owner: ubuntu
-        group: ubuntu
-
-    - name: Build Docker image
-      docker_image:
-        path: "{{ app_code_path }}"
-        name: "{{ docker_image_name }}"
-        state: present
-
-    - name: Run Docker container
-      docker_container:
-        name: "{{ app_name }}"
-        image: "{{ docker_image_name }}"
-        state: started
-        exposed_ports:
-          - "{{ container_port }}"
-        published_ports:
-          - "{{ container_port }}:{{ container_port }}"
-        restart_policy: always
-        detach: true
-Playbook Explanation
-Install Docker: Ensures Docker is installed on the target server.
-Copy Application Code: Copies the local application code to the target server's specified directory.
-Build Docker Image: Builds a Docker image from the application code on the target server.
-Run Docker Container: Runs the application in a Docker container, exposing the specified port.
-6. Run the Ansible Playbook
-Run the following command to deploy the application to your server:
-
-bash
-Copy code
-ansible-playbook ansible/deploy_nodejs_app.yml -i your_inventory_file
-Replace your_inventory_file with the path to your Ansible inventory file containing the server details.
-
-Variables
-app_name: Name of the Docker container.
-docker_image_name: Name of the Docker image to build and run.
-app_code_path: Path where the application code is stored on the server.
-container_port: Port on which the application runs.
-Contributing
-Contributions are welcome! Feel free to fork this repository, make your changes, and submit a pull request.
-
-License
-This project is licensed under the MIT License. See the LICENSE file for more details.
-
+</body>
+</html>
