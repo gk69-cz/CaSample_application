@@ -25,7 +25,7 @@ resource "aws_key_pair" "key_pair" {
 }
 
 resource "aws_security_group" "sg_ec2" {
-  name = "sg_ec2"
+  name = "sg_ec2_new"
 
   ingress {
     from_port   = 22
