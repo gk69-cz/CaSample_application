@@ -13,34 +13,19 @@ provider "aws" {
   secret_key = "KyrhBKLP/nwIcIAA5ULUBkb57+FrmcrjxucPQuS8"  # Replace with a variable in production
 }
 
-# Check if the Key Pair exists, otherwise create it
-data "aws_key_pair" "existing_key_pair" {
-  key_name = "deploy_key_new_2"  # Replace with the key pair name you want to check
-}
-
+# Generate SSH Key Pair
 resource "tls_private_key" "rsa_4096" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
 resource "aws_key_pair" "key_pair" {
-  count       = length(data.aws_key_pair.existing_key_pair.key_name) == 0 ? 1 : 0  # Create if not found
-  key_name    = "deploy_key_new_2"  # Replace with the desired key pair name
-  public_key  = tls_private_key.rsa_4096.public_key_openssh
-}
-
-# Check if Security Group exists, otherwise create it
-data "aws_security_group" "existing_sg" {
-  filter {
-    name   = "group-name"
-    values = ["sg_ec2_new_2"]  # Replace with the name of your security group
-  }
+  key_name   = "deploy_key_new_2"
+  public_key = tls_private_key.rsa_4096.public_key_openssh
 }
 
 resource "aws_security_group" "sg_ec2" {
-  count = length(data.aws_security_group.existing_sg.id) == 0 ? 1 : 0  # Create if not found
-
-  name = "sg_ec2_new_2"  # Replace with the desired security group name
+  name = "sg_ec2_new_2"
 
   ingress {
     from_port   = 22
@@ -65,16 +50,10 @@ resource "aws_security_group" "sg_ec2" {
 }
 
 resource "aws_instance" "public_instance" {
-  ami                    = "ami-0404dae8586132164"  # Replace with your AMI ID
-  instance_type          = "t2.micro"
-  key_name               = coalesce(
-    data.aws_key_pair.existing_key_pair.key_name,
-    aws_key_pair.key_pair[0].key_name
-  )
-  vpc_security_group_ids = coalesce(
-    data.aws_security_group.existing_sg.id,
-    aws_security_group.sg_ec2[0].id
-  )
+  ami                    = "ami-0404dae8586132164"
+  instance_type           = "t2.micro"
+  key_name                = aws_key_pair.key_pair.key_name  # Fixed this line
+  vpc_security_group_ids  = [aws_security_group.sg_ec2.id]  # Fixed this line
 
   provisioner "local-exec" {
     command = "echo > ../terraform/dynamic_inventory.ini"
