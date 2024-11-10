@@ -28,9 +28,9 @@ jobs:
     - name: Terraform Plan
       run: terraform plan
 
-    # Step 5: Terraform Apply
-    - name: Terraform Apply
-      run: terraform apply -auto-approve
+    # # Step 5: Terraform Apply
+    # - name: Terraform Apply
+    #   run: terraform apply -auto-approve
 
     # Step 6: Set up Ansible
     - name: Set up Ansible
