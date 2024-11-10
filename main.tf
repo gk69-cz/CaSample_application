@@ -9,8 +9,8 @@ terraform {
 
 provider "aws" {
   region     = "eu-west-1"
-  access_key = "AKIAXZEFH5MUIYKGTUVH"  # Replace with a variable in production
-  secret_key = "KyrhBKLP/nwIcIAA5ULUBkb57+FrmcrjxucPQuS8"  # Replace with a variable in production
+  access_key = "AKIAXZEFH5MUCJL6HQUR"  # Replace with a variable in production
+  secret_key = "Y9SB1nzejCYyOOu8vFsg6az2Rv+4u4LwHFpmgTpq"  # Replace with a variable in production
 }
 
 # Generate SSH Key Pair
