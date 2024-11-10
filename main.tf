@@ -20,7 +20,7 @@ resource "tls_private_key" "rsa_4096" {
 }
 
 resource "aws_key_pair" "key_pair" {
-  key_name   = "deploy_key"
+  key_name   = "deploy_key_new"
   public_key = tls_private_key.rsa_4096.public_key_openssh
 }
 
