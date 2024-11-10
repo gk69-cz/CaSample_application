@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const helloController = require('../controller/hellowcontroler');
+const helloController = require('./helloController');
 
 router.get('/hello', helloController.sayHello);
 
