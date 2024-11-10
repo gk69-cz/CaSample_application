@@ -67,11 +67,11 @@ resource "aws_security_group" "sg_ec2" {
 resource "aws_instance" "public_instance" {
   ami                    = "ami-0404dae8586132164"  # Replace with your AMI ID
   instance_type          = "t2.micro"
-  key_name               = coalesced(
+  key_name               = coalesce(
     data.aws_key_pair.existing_key_pair.key_name,
     aws_key_pair.key_pair[0].key_name
   )
-  vpc_security_group_ids = coalesced(
+  vpc_security_group_ids = coalesce(
     data.aws_security_group.existing_sg.id,
     aws_security_group.sg_ec2[0].id
   )
