@@ -6,9 +6,22 @@ terraform {
     }
   }
 }
+variable "aws_access_key" {
+  type = string
+  description = "AWS access key"
+  default = null
+}
+
+variable "aws_secret_key" {
+  type = string
+  description = "AWS secret key"
+  default = null
+}
 
 provider "aws" {
   region = "eu-west-1"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
 }
 
 # Generate SSH Key Pair
