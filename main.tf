@@ -32,12 +32,12 @@ resource "tls_private_key" "rsa_4096" {
 }
 
 resource "aws_key_pair" "key_pair" {
-  key_name   = "deploy_key"
+  key_name   = "deploy_key_20"
   public_key = tls_private_key.rsa_4096.public_key_openssh
 }
 
 resource "aws_security_group" "sg_ec2" {
-  name = "sg_ec2"
+  name = "sg_ec2_new"
 
   ingress {
     from_port   = 22
