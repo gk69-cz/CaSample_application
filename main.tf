@@ -10,7 +10,7 @@ terraform {
 provider "aws" {
   region = "eu-west-1"
   access_key = "${{ secrets.AWS_ACCESS_KEY_ID }}"  # Replace with a variable in production
-  secret_key = "${{ secrets.AWS_ACCESS_KEY_Secret }}"  # Replace with a variable in production
+  secret_key = "${{ secrets.AWS_ACCESS_KEY_SECRETS }}"  # Replace with a variable in production
 }
 
 # Generate SSH Key Pair
