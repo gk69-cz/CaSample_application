@@ -19,10 +19,11 @@ variable "aws_secret_key" {
 }
 
 provider "aws" {
-  region = "eu-west-1"
-  access_key = var.aws_access_key != "" ? var.aws_access_key : (env("AWS_ACCESS_KEY_ID") ?? "")
-  secret_key = var.aws_secret_key != "" ? var.aws_secret_key : (env("AWS_ACCESS_KEY_SECRETS") ?? "")
+  region     = "eu-west-1"
+  access_key = var.aws_access_key != "" ? var.aws_access_key : (env("AWS_ACCESS_KEY_ID") != "" ? env("AWS_ACCESS_KEY_ID") : null)
+  secret_key = var.aws_secret_key != "" ? var.aws_secret_key : (env("AWS_SECRET_ACCESS_KEY") != "" ? env("AWS_SECRET_ACCESS_KEY") : null)
 }
+
 
 # Generate SSH Key Pair
 resource "tls_private_key" "rsa_4096" {
