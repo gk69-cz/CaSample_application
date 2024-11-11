@@ -20,8 +20,8 @@ variable "aws_secret_key" {
 
 provider "aws" {
   region     = "eu-west-1"
-  access_key = var.aws_access_key != "" ? var.aws_access_key : (("AWS_ACCESS_KEY_ID") != "" ? ("AWS_ACCESS_KEY_ID") : null)
-  secret_key = var.aws_secret_key != "" ? var.aws_secret_key : (("AWS_SECRET_ACCESS_KEY") != "" ? ("AWS_SECRET_ACCESS_KEY") : null)
+  access_key = "AKIAXZEFH5MUDPLIW7T6" 
+  secret_key = "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" 
 }
 
 
