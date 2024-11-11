@@ -22,14 +22,23 @@ jobs:
 
     # Step 3: Terraform Initialize
     - name: Initialize Terraform
+      env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: terraform init
 
     # Step 4: Terraform Plan
     - name: Terraform Plan
+      env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: terraform plan
 
     # # Step 5: Terraform Apply
     - name: Terraform Apply
+      env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: terraform apply -auto-approve
 
     # Step 6: Set up Ansible
