@@ -10,7 +10,7 @@ resource "azurerm_resource_group" "rg" {
 
 # 2. Azure Container Registry
 resource "azurerm_container_registry" "acr" {
-  name                = "myacrname"
+  name                = "myacrname"  # Ensure the name is globally unique
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   sku                  = "Basic"
@@ -39,7 +39,7 @@ resource "azurerm_web_app" "web_app" {
   app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
 
   site_config {
-    linux_fx_version = "DOCKER|${azurerm_container_registry.acr.login_server}/nodejs-app:${var.docker_image_tag}"
+    linux_fx_version = "DOCKER|${azurerm_container_registry.acr.login_server}/myapp:${var.docker_image_tag}"
   }
 
   app_settings = {
