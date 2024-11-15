@@ -1,104 +1,137 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.0"
-    }
-  }
-}
-variable "aws_access_key" {
-  type = string
-  description = "AWS access key"
-  default = null
+provider "azurerm" {
+  features {}
 }
 
-variable "aws_secret_key" {
-  type = string
-  description = "AWS secret key"
-  default = null
+variable "client_id" {
+  type        = string
+  description = "Azure client ID"
 }
 
-provider "aws" {
-  region     = "eu-west-1"
-  access_key = ${var.aws_access_key}  # Replace with a variable in production
-  secret_key = ${var.aws_secret_key}
+variable "client_secret" {
+  type        = string
+  description = "Azure client secret"
 }
 
+variable "tenant_id" {
+  type        = string
+  description = "Azure tenant ID"
+}
 
-# Generate SSH Key Pair
-resource "tls_private_key" "rsa_4096" {
+variable "subscription_id" {
+  type        = string
+  description = "Azure subscription ID"
+}
+
+resource "azurerm_resource_group" "rg" {
+  name     = "app_resource_group"
+  location = "West Europe"
+}
+
+resource "azurerm_virtual_network" "vnet" {
+  name                = "vnet"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  address_space       = ["10.0.0.0/16"]
+}
+
+resource "azurerm_subnet" "subnet" {
+  name                 = "subnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.1.0/24"]
+}
+
+resource "tls_private_key" "ssh_key" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-resource "aws_key_pair" "key_pair" {
-  key_name   = "deploy_key_20"
-  public_key = tls_private_key.rsa_4096.public_key_openssh
-}
+resource "azurerm_network_security_group" "nsg" {
+  name                = "app_security_group"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
 
-resource "aws_security_group" "sg_ec2" {
-  name = "sg_ec2_new"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+  security_rule {
+    name                       = "SSH"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
   }
 
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_instance" "public_instance" {
-  ami                    = "ami-0404dae8586132164"
-  instance_type          = "t2.micro"
-  key_name               = aws_key_pair.key_pair.key_name
-  vpc_security_group_ids = [aws_security_group.sg_ec2.id]
-
-  provisioner "local-exec" {
-    command = "echo > ../terraform/dynamic_inventory.ini"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "echo 'Instance ready'"
-    ]
-
-    connection {
-      type        = "ssh"
-      host        = self.public_ip
-      user        = "ubuntu"
-      private_key = tls_private_key.rsa_4096.private_key_pem
-    }
+  security_rule {
+    name                       = "AppPort"
+    priority                   = 1002
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "8080"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
   }
 }
 
-data "template_file" "inventory" {
-  template = <<-EOT
-    [ec2_instances]
-    ${aws_instance.public_instance.public_ip} ansible_user=ubuntu ansible_private_key_file=${path.module}/deploy_key.pem
-    EOT
+resource "azurerm_network_interface" "nic" {
+  name                = "app_nic"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.public_ip.id
+  }
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+resource "azurerm_public_ip" "public_ip" {
+  name                = "app_public_ip"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Dynamic"
+}
+
+resource "azurerm_linux_virtual_machine" "vm" {
+  name                = "app_vm"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  size                = "Standard_B1s"
+  admin_username      = "azureuser"
+  network_interface_ids = [
+    azurerm_network_interface.nic.id,
+  ]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "18.04-LTS"
+    version   = "latest"
+  }
+
+  admin_ssh_key {
+    username   = "azureuser"
+    public_key = tls_private_key.ssh_key.public_key_openssh
+  }
 }
 
 resource "local_file" "dynamic_inventory" {
-  depends_on = [aws_instance.public_instance]
-
   filename = "dynamic_inventory.ini"
-  content  = data.template_file.inventory.rendered
+  content = <<-EOF
+    [azure_instances]
+    ${azurerm_linux_virtual_machine.vm.public_ip_address} ansible_user=azureuser ansible_ssh_private_key_file=${path.module}/private_key.pem
+  EOF
 }
 
-output "instance_public_ip" {
-  value = aws_instance.public_instance.public_ip
+output "public_ip" {
+  value = azurerm_linux_virtual_machine.vm.public_ip_address
 }
