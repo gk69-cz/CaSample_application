@@ -1,4 +1,3 @@
-// helloRouter.js
 const express = require('express');
 const router = express.Router();
 const helloController = require('./controling');  // Update this to the path of controling.js
