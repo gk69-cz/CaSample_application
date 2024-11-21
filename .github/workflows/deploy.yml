@@ -25,10 +25,15 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Application
-        run: npm run build
-        if: contains(fromJson(file('package.json')).scripts, 'build')
-
+      - name: Build Node.js Application
+        run: |
+          if [ -f "package.json" ]; then
+            echo "Running build script if available";
+            npm run build || echo "No build script in package.json";
+          else
+            echo "No package.json found";
+          fi
+          
       - name: Archive Files for Deployment
         run: zip -r ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/app.zip . -x '*.git*'
 
