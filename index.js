@@ -1,22 +1,10 @@
 const express = require('express');
-const path = require('path');
-const helloRouter = require('./helloRouter'); // Import the router file
-
 const app = express();
+const helloRouter = require('./routing');  // Update this to the path of your router file
 
-// Serve static files, including index.html
-app.use(express.static(path.join(__dirname)));
+app.use('/api', helloRouter);  // Use the router here with a path prefix
 
-// Use the helloRouter for API routes
-app.use('/api', helloRouter);
-
-// Default route to serve the homepage
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(Server is running on port ${PORT});
 });
