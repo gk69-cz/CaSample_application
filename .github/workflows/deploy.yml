@@ -27,7 +27,7 @@ jobs:
 
       - name: Build Application
         run: npm run build
-        if: exists('package.json') && contains(fromJson(file('package.json')).scripts, 'build')
+        if: contains(fromJson(file('package.json')).scripts, 'build')
 
       - name: Archive Files for Deployment
         run: zip -r ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/app.zip . -x '*.git*'
