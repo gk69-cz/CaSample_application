@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js", // Added for local development with live reload
+    "dev": "nodemon index.js", 
     "build": "echo \"No build step needed for Express app\""
   },
   "keywords": ["sample", "express", "application"],
@@ -16,7 +16,7 @@
     "express": "^4.21.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22" // Added for local development with auto-reload
+    "nodemon": "^2.0.22" 
   }
 }
 
