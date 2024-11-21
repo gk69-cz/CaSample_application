@@ -1,9 +1,13 @@
-name: Deploy to Azure VM
+name: Deploy Node.js App to Azure
 
 on:
   push:
     branches:
       - main
+
+env:
+  AZURE_WEBAPP_NAME: testingca
+  AZURE_WEBAPP_PACKAGE_PATH: "./publish"
 
 jobs:
   deploy:
@@ -11,41 +15,26 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          terraform_version: 1.1.5
+          node-version: '16' # Replace with your Node.js version
 
-      - name: Initialize Terraform
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        run: terraform init
+      - name: Install Dependencies
+        run: npm install
 
-      - name: Terraform Plan
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        run: terraform plan
+      - name: Build Application
+        run: npm run build
+        if: exists('package.json') && contains(fromJson(file('package.json')).scripts, 'build')
 
-      - name: Terraform Apply
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        run: terraform apply -auto-approve
+      - name: Archive Files for Deployment
+        run: zip -r ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/app.zip . -x '*.git*'
 
-      - name: Set up Ansible
-        run: |
-          sudo apt update
-          sudo apt install -y ansible
-
-      - name: Run Ansible Playbook
-        run: ansible-playbook -i dynamic_inventory.ini ansible/deploy_nodejs_app.yml
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/app.zip"
