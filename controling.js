@@ -1,4 +1,4 @@
 // controling.js
 exports.sayHello = (req, res) => {
-    res.send("Hello, Jaison!");
+    res.send("Hello, Guys");
 };
