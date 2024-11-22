@@ -1,4 +1,4 @@
-name: Deploy Node.js App to Azure
+name: Build and Deploy Node.js App to Azure
 
 on:
   push:
@@ -6,34 +6,50 @@ on:
       - main
 
 env:
-  AZURE_WEBAPP_NAME: testingca
-  AZURE_WEBAPP_PACKAGE_PATH: "./"
+  AZURE_WEBAPP_NAME: testingca  # Replace with your Azure Web App name
+  AZURE_WEBAPP_PACKAGE_PATH: "./"  # Path to your application
+  IMAGE_REPOSITORY: testca  # Replace with your Docker repository name
+  CONTAINER_REGISTRY: testca.azurecr.io  # e.g., myregistry.azurecr.io
+  TAG: ${{ github.sha }}  # Using commit SHA as the image tag
 
 jobs:
-  deploy:
+  build_and_push:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Azure Container Registry
+        uses: docker/login-action@v2
         with:
-          node-version: '16' # Replace with your Node.js version
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.TAG }} .
+      
+      - name: Push Docker Image to ACR
+        run: |
+          docker push ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.TAG }}
 
-      - name: Build Node.js Application
-        run: npm run build
-          
-      - name: Archive Files for Deployment
-        run: zip -r ${{ env.AZURE_WEBAPP_PACKAGE_PATH }} . -x '*.git*'
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_and_push  # This ensures that the deploy step runs after the build and push step
 
-      - name: Deploy to Azure Web App
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Azure Web App for Docker
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-          package: "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}  # Set your Azure publish profile as a secret in GitHub
+          images: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.TAG }}
+
