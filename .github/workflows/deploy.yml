@@ -3,7 +3,7 @@ name: Build and Deploy Node.js App to Azure
 on:
   push:
     branches:
-      - main
+      - Azurefinal
 
 env:
   AZURE_WEBAPP_NAME: testingca  # Replace with your Azure Web App name
