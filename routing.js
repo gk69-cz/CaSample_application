@@ -5,7 +5,7 @@ const helloController = require('./controling');  // Update this to the path of 
 router.get('/hello', helloController.sayHello);
 
 router.get('/', (req, res) => {
-  res.send('Welcome to the Home Page!');
+  res.send('Welcome to Home Page!');
 });
 
 module.exports = router;
